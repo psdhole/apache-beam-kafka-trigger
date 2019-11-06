@@ -6,11 +6,7 @@ import lombok.*;
  * The class {@link LogMessage}
  */
 @Data
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
-@Setter
-@Getter
+@Builder
 public class LogMessage
 {
     private String logType;

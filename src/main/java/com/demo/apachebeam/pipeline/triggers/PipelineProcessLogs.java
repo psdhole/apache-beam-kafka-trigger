@@ -11,8 +11,7 @@ import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.SimpleFunction;
-import org.apache.beam.sdk.transforms.windowing.FixedWindows;
-import org.apache.beam.sdk.transforms.windowing.Window;
+import org.apache.beam.sdk.transforms.windowing.*;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -33,8 +32,7 @@ public class PipelineProcessLogs {
   private static final String INPUT_TOPIC = "input-log-topic";
 
   /** The Constant INPUT_TOPIC. */
-  private static final String OUTPUT_FILE_NAME =
-      "D:\\work\\gitrepo\\apache-beam-kafka-trigger-demo\\output\\LogMessages.csv";
+  private static final String OUTPUT_FILE_NAME = "output";
 
   /** Recieve and send data. */
   private static void recieveAndSendData() {
@@ -54,18 +52,31 @@ public class PipelineProcessLogs {
                     .withoutMetadata())
             .apply(
                 "Apply Fixed window: ",
-                Window.<KV<String, String>>into(FixedWindows.of(Duration.standardSeconds(5))))
+                Window.<KV<String, String>>into(FixedWindows.of(Duration.standardMinutes(2)))
+                    .triggering(
+                        Repeatedly.forever(
+                            AfterFirst.of(
+                                AfterPane.elementCountAtLeast(90),
+                                AfterProcessingTime.pastFirstElementInPane()
+                                    .plusDelayOf(Duration.standardMinutes(2)))))
+                    .withAllowedLateness(Duration.ZERO)
+                    .discardingFiredPanes())
             .apply(
                 MapElements.via(
                     new SimpleFunction<KV<String, String>, String>() {
                       private static final long serialVersionUID = 1L;
-
                       @Override
                       public String apply(KV<String, String> inputJSON) {
                         return inputJSON.getValue();
                       }
                     }));
-    output.apply(TextIO.write().withWindowedWrites().to(OUTPUT_FILE_NAME).withNumShards(10));
+    output.apply(
+        TextIO.write()
+            .withWindowedWrites()
+            .withShardNameTemplate("-logfile-SS-of-NN")
+            .to(OUTPUT_FILE_NAME)
+            .withNumShards(5)
+            .withSuffix(".csv"));
     pipeline.run();
     LOGGER.debug("All done ..!!");
   }

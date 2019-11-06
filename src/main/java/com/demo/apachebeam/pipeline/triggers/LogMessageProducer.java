@@ -24,13 +24,13 @@ public class LogMessageProducer {
    * @param args the arguments
    */
   public static void main(String[] args) {
-    for (long i = 0; i < 10; i++) {
-      LogMessage message1 = new LogMessage(LogType.INFO.toString(), "1", "1", "msg111" + i);
-      LogMessage message2 = new LogMessage(LogType.ERROR.toString(), "2", "2", "msg222" + i);
-      LogMessage message3 = new LogMessage(LogType.TRACE.toString(), "3", "3", "msg333" + i);
-      LogMessage message4 = new LogMessage(LogType.WARNING.toString(), "4", "4", "msg444" + i);
-      LogMessage message5 = new LogMessage(LogType.FATAL.toString(), "5", "5", "msg555" + i);
-      LogMessage message6 = new LogMessage(LogType.DEBUG.toString(), "5", "5", "msg666" + i);
+    for (long i = 0; i < 100; i++) {
+      LogMessage message1 = new LogMessage(LogType.INFO.toString(), "1", "1", "NEWMSG111" + i);
+      LogMessage message2 = new LogMessage(LogType.DEBUG.toString(), "2", "2", "NEWMSG222" + i);
+      LogMessage message3 = new LogMessage(LogType.TRACE.toString(), "3", "3", "NEWMSG333" + i);
+      LogMessage message4 = new LogMessage(LogType.WARNING.toString(), "4", "4", "NEWMSG444" + i);
+      LogMessage message5 = new LogMessage(LogType.FATAL.toString(), "5", "5", "NEWMSG555" + i);
+      LogMessage message6 = new LogMessage(LogType.ERROR.toString(), "5", "5", "NEWMSG666" + i);
       sendLog(message1);
       sendLog(message2);
       sendLog(message3);
@@ -54,7 +54,7 @@ public class LogMessageProducer {
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
     props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
     ObjectMapper mapper = new ObjectMapper();
-    try (Producer<String, String> producer = new KafkaProducer<>(props) ) {
+    try (Producer<String, String> producer = new KafkaProducer<>(props)) {
       String logMessage = mapper.writeValueAsString(message);
       ProducerRecord<String, String> logMessageRecordToSend =
           new ProducerRecord<>(topic, message.getLogType(), logMessage);

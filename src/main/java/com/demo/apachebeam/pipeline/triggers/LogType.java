@@ -1,8 +1,6 @@
 package com.demo.apachebeam.pipeline.triggers;
 
-/**
- * The ENUM {@link LogType}.
- */
+/** The ENUM {@link LogType}. */
 public enum LogType {
   ERROR,
   DEBUG,
